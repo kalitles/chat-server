@@ -8,7 +8,8 @@ banned_nicks = []  # Список забаненных никнеймов
 muted_clients = []  # Список замьюченных клиентов (socket)
 muted_nicks = []  # Список замьюченных никнеймов
 
-
+host = '0.0.0.0'
+port = int(os.environ.get("PORT", 404))
 
 def handle_client(client_socket, address):
     global clients, muted_clients, banned_nicks
@@ -295,71 +296,14 @@ def start_server():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-    host = '0.0.0.0'
-    port = int(os.environ.get("PORT", 404))
 
     server.bind((host, port))
     server.listen(5)
-    print(f"server started on {host}:{port}")
-    print("wait connections...")
-    show_commands()
+    print(f" Server started on {host}:{port}")
+    print("  Waiting for connections...")
+    print("  Server is running in production mode")
+    print("  Admin commands are disabled on Render")
 
-    def server_commands():
-        while True:
-            try:
-                cmd = input("\nserver> ").strip().split()
-                if not cmd:
-                    continue
-
-                if cmd[0].lower() == 'list':
-                    list_clients()
-
-                elif cmd[0].lower() == 'banip' and len(cmd) > 1:
-                    ban_ip(cmd[1])
-
-                elif cmd[0].lower() == 'unbanip' and len(cmd) > 1:
-                    unban_ip(cmd[1])
-
-                elif cmd[0].lower() == 'bannick' and len(cmd) > 1:
-                    ban_nick(cmd[1])
-
-                elif cmd[0].lower() == 'unbannick' and len(cmd) > 1:
-                    unban_nick(cmd[1])
-
-                elif cmd[0].lower() == 'muteip' and len(cmd) > 1:
-                    mute_ip(cmd[1])
-
-                elif cmd[0].lower() == 'unmuteip' and len(cmd) > 1:
-                    unmute_ip(cmd[1])
-
-                elif cmd[0].lower() == 'mutenick' and len(cmd) > 1:
-                    mute_nick(cmd[1])
-
-                elif cmd[0].lower() == 'unmutenick' and len(cmd) > 1:
-                    unmute_nick(cmd[1])
-
-                elif cmd[0].lower() == 'banned':
-                    show_banned()
-
-                elif cmd[0].lower() == 'muted':
-                    show_muted()
-
-                elif cmd[0].lower() == 'commands':
-                    show_commands()
-
-                elif cmd[0].lower() == 'quit':
-                    print("server closed...")
-                    os._exit(0)
-
-                else:
-                    print("Unknown command. Type 'commands' for available commands.")
-
-            except Exception as e:
-                print(f"Command error: {e}")
-
-    command_thread = threading.Thread(target=server_commands)
-    command_thread.daemon = True
-    command_thread.start()
 
     try:
         while True:
@@ -370,9 +314,12 @@ def start_server():
             )
             client_thread.daemon = True
             client_thread.start()
+            print(f"New connection handled: {address}")
 
     except KeyboardInterrupt:
-        print("\nserver stopped")
+        print("\nServer stopped by admin")
+    except Exception as e:
+        print(f"Server error: {e}")
     finally:
         server.close()
 
