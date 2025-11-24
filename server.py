@@ -136,5 +136,5 @@ def start_server():
     finally:
         server.close()
 
-if __name__ == "main":
+if __name__ == "__main__":
     start_server()
